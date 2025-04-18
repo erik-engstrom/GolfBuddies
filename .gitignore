@@ -1,0 +1,18 @@
+# Node modules
+frontend/node_modules/
+
+# Rails specific
+backend/tmp/
+backend/log/*.log
+backend/.byebug_history
+backend/storage/
+backend/config/master.key
+backend/config/credentials.yml.enc
+backend/.env
+
+# macOS specific
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/

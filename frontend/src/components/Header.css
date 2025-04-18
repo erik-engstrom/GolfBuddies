@@ -1,0 +1,46 @@
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #282c34; /* Dark background */
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-title a {
+  color: #61dafb; /* React blue */
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.header-nav a,
+.header-nav button {
+  color: white;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.header-nav a:hover,
+.header-nav button:hover {
+  color: #61dafb; /* Highlight on hover */
+}
+
+.logout-button {
+  background-color: #dc3545; /* Red for logout */
+  color: white;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+  color: white;
+}

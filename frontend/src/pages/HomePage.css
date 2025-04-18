@@ -1,0 +1,140 @@
+.home-page {
+  padding: 0; /* Remove padding to allow banner to span full width */
+  max-width: 100%; /* Allow full width */
+  margin: 0 auto;
+}
+
+.banner {
+  height: 250px; /* Adjust height as needed */
+  background-color: #a8d8b0; /* Placeholder light green */
+  /* background-image: url('YOUR_GOLF_COURSE_IMAGE_URL_HERE'); */ /* Replace with your image URL - MUST be a valid URL or path */
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.content-area {
+  padding: 0 2rem 2rem; /* Add padding back for content below banner */
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.create-post-form,
+.posts-section {
+  background-color: #f8f9fa; /* Light background for sections */
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.create-post-form h2,
+.posts-section h2 {
+  margin-top: 0;
+  color: #343a40; /* Darker heading */
+  border-bottom: 1px solid #dee2e6; /* Separator line */
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.create-post-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  resize: vertical; /* Allow vertical resizing */
+}
+
+.create-post-form button {
+  background-color: #007bff; /* Primary blue */
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.create-post-form button:hover {
+  background-color: #0056b3;
+}
+
+.create-post-form button:disabled {
+  background-color: #6c757d; /* Gray when disabled */
+  cursor: not-allowed;
+}
+
+.posts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.posts-table th,
+.posts-table td {
+  border: 1px solid #dee2e6; /* Lighter border */
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.posts-table th {
+  background-color: #e9ecef; /* Light gray header */
+  font-weight: 600;
+}
+
+.posts-table tbody tr:nth-child(odd) {
+  background-color: #f8f9fa; /* Subtle striping */
+}
+
+.posts-table td:nth-child(1) { /* Content column */
+  width: 60%;
+  word-break: break-word; /* Prevent long words from overflowing */
+}
+
+.posts-table td:nth-child(2), /* Author column */
+.posts-table td:nth-child(3) { /* Date column */
+  width: 20%;
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.error-message {
+  color: #dc3545; /* Red for errors */
+  margin-bottom: 1rem;
+}
+
+.loading-message,
+.no-posts-message {
+  color: #6c757d; /* Gray text */
+  font-style: italic;
+}
+
+/* Styles for like and comment indicators */
+.post-likes, .post-comments {
+  text-align: center;
+}
+
+.like-count, .comment-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.like-count i {
+  color: #4267B2; /* Facebook blue for likes */
+}
+
+.comment-count i {
+  color: #65676B; /* Gray for comments */
+}
