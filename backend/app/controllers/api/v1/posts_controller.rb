@@ -14,7 +14,7 @@ class Api::V1::PostsController < ApplicationController
 
       # Add profile picture URL if user and picture exist
       if post.user&.profile_picture&.attached? && post_data[:user].present?
-        post_data[:user][:profile_picture_url] = url_for(post.user.profile_picture)
+        post_data[:user][:profile_picture_url] = rails_blob_url(post.user.profile_picture)
       elsif post_data[:user].present?
         # For users without a profile picture, use the default with full URL
         post_data[:user][:profile_picture_url] = "http://localhost:3005/default_pic.png"

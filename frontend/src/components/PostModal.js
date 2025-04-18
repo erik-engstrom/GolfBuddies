@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react'; // Add useEffec
 import Modal from 'react-modal';
 import { fetchWithAuth } from '../utils/auth';
 import './PostModal.css';
-import defaultProfilePic from '../images/default_pic.png';
 
 function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
   const [comments, setComments] = useState([]);
@@ -268,9 +267,15 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
         <div className="post-author-header">
           <div className="author-thumbnail">
             <img
-              src={post.user?.profile_picture_url || defaultProfilePic}
-              alt="User"
+              src={post.user?.profile_picture_url || "/default_pic.png"}
+              alt={post.user ? `${post.user.first_name || 'User'}'s profile` : "Default user profile"}
               className="profile-thumbnail"
+              onError={(e) => {
+                console.log("Post author profile image load error, using fallback");
+                e.target.onerror = null; // Prevent infinite loop
+                // Use absolute URL to the default image
+                e.target.src = "/default_pic.png";
+              }}
             />
           </div>
           <div className="author-info">
@@ -307,9 +312,15 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
                   <div className="comment-header">
                     <div className="comment-thumbnail">
                       <img
-                        src={comment.user?.profile_picture_url || defaultProfilePic}
-                        alt="User"
+                        src={comment.user?.profile_picture_url || "/default_pic.png"}
+                        alt={comment.user ? `${comment.user.first_name || 'User'}'s profile` : "Default user profile"}
                         className="comment-profile-thumbnail"
+                        onError={(e) => {
+                          console.log("Comment profile image load error, using fallback");
+                          e.target.onerror = null; // Prevent infinite loop
+                          // Use absolute URL to the default image
+                          e.target.src = "/default_pic.png";
+                        }}
                       />
                     </div>
                     <div className="comment-user-info">

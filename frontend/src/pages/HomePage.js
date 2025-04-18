@@ -3,7 +3,6 @@ import { fetchWithAuth } from '../utils/auth';
 import PostModal from '../components/PostModal';
 import './HomePage.css';
 import bannerImage from '../images/golf-banner.jpg';
-import defaultProfilePic from '../images/default_pic.png';
 
 function HomePage() {
   const [postContent, setPostContent] = useState('');
@@ -53,13 +52,14 @@ function HomePage() {
       // Sort posts by creation date, newest first
       const sortedPosts = (fetchedPosts || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-      // Debug: Log posts to check profile picture URLs
-      console.log('Loaded posts with profile pictures:',
+      // Enhanced debugging for profile pictures
+      console.log('Loaded posts with detailed profile picture info:',
         sortedPosts.map(post => ({
           id: post.id,
           user: post.user?.username || 'Unknown',
           hasProfilePic: !!post.user?.profile_picture_url,
-          profilePicUrl: post.user?.profile_picture_url
+          profilePicUrl: post.user?.profile_picture_url,
+          fullUserObject: post.user
         }))
       );
 
@@ -323,13 +323,18 @@ function HomePage() {
                       <div className="post-author-info">
                         {/* User thumbnail */}
                         <div className="user-thumbnail">
+                          {/* Using improved profile picture handling */}
                           <img
-                            src={post.user?.profile_picture_url || defaultProfilePic}
-                            alt="User"
+                            src={post.user && post.user.profile_picture_url 
+                              ? post.user.profile_picture_url 
+                              : "/default_pic.png"}
+                            alt={post.user ? `${post.user.first_name || 'User'}'s profile` : "Default user profile"}
                             className="profile-thumbnail"
                             onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = defaultProfilePic;
+                              console.log("Image load error, using absolute fallback");
+                              e.target.onerror = null; // Prevent infinite loop
+                              // Use absolute URL to the default image
+                              e.target.src = "/default_pic.png";
                             }}
                           />
                         </div>
@@ -406,14 +411,14 @@ function HomePage() {
                         <div className="delete-confirmation" onClick={(e) => e.stopPropagation()}>
                           <p>Are you sure you want to delete this post?</p>
                           <div className="confirmation-buttons">
-                            <button 
-                              className="confirm-delete-button" 
+                            <button
+                              className="confirm-delete-button"
                               onClick={(e) => handleDeletePost(e, post.id)}
                             >
                               Yes, Delete
                             </button>
-                            <button 
-                              className="cancel-delete-button" 
+                            <button
+                              className="cancel-delete-button"
                               onClick={(e) => handleCancelDelete(e)}
                             >
                               Cancel
