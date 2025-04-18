@@ -38,6 +38,13 @@ module Api
         @like = @post.likes.find_by(user: @current_user)
 
         if @like
+          # Ensure the like belongs to the current user
+          if @like.user_id != @current_user.id
+            Rails.logger.warn "Unauthorized attempt to unlike post. Like user: #{@like.user_id}, Current user: #{@current_user.id}"
+            render json: { error: 'You are not authorized to unlike this post.' }, status: :forbidden
+            return
+          end
+
           Rails.logger.debug "Found like to destroy: #{@like.id}"
           begin
             @like.destroy

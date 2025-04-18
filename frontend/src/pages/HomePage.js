@@ -3,7 +3,8 @@ import { fetchWithAuth } from '../utils/auth';
 import PostModal from '../components/PostModal'; // Import the modal component
 import './HomePage.css';
 // Import the banner image from the src/images directory
-import bannerImage from '../images/golf-banner.jpg'; 
+import bannerImage from '../images/golf-banner.jpg';
+import defaultProfilePic from '../images/default_pic.png';
 
 function HomePage() {
   const [postContent, setPostContent] = useState('');
@@ -95,6 +96,44 @@ function HomePage() {
     }
   };
 
+  // --- Handle Like/Unlike directly from the list ---
+  const handleLikeToggle = async (event, postId, currentUserLiked) => {
+    event.stopPropagation(); // Prevent opening the modal
+
+    const method = currentUserLiked ? 'DELETE' : 'POST';
+    const url = `http://localhost:3005/api/v1/posts/${postId}/like`;
+
+    // Optimistic UI update
+    const postIndex = posts.findIndex(p => p.id === postId);
+    if (postIndex === -1) return; // Post not found
+
+    const originalPost = posts[postIndex];
+    const updatedPost = {
+      ...originalPost,
+      like_count: currentUserLiked ? (originalPost.like_count || 1) - 1 : (originalPost.like_count || 0) + 1,
+      user_liked: !currentUserLiked
+    };
+
+    const newPosts = [...posts];
+    newPosts[postIndex] = updatedPost;
+    setPosts(newPosts); // Update state immediately
+
+    try {
+      console.log(`Toggling like for post ${postId}: ${method}`); // Add logging
+      await fetchWithAuth(url, { method });
+      console.log(`Successfully toggled like for post ${postId}`); // Add logging
+      // API call successful, UI already updated
+    } catch (err) {
+      console.error('Failed to toggle like:', err); // Log the error
+      // Revert optimistic update on error
+      const revertedPosts = [...posts]; // Create a new array from the original state before the optimistic update
+      revertedPosts[postIndex] = originalPost; // Put the original post back
+      setPosts(revertedPosts); 
+      setError(err.message || 'Failed to update like status.');
+    }
+  };
+
+
   return (
     <div className="home-page">
       {/* Apply the banner style directly */}
@@ -149,31 +188,47 @@ function HomePage() {
             <table className="posts-table">
               <thead>
                 <tr>
-                  <th>Content</th>
-                  <th>Author</th>
+                  <th>Post</th> {/* Changed header from Content */}
+                  {/* <th>Author</th> Removed Author header */}
                   <th>Date</th>
-                  <th>Likes</th>
-                  <th>Comments</th>
                 </tr>
               </thead>
               <tbody>
                 {posts.map((post) => (
                   <tr key={post.id} onClick={() => handleOpenModal(post)} style={{ cursor: 'pointer' }}>
-                    {/* Truncate long content in the table view */}
-                    <td>{post.content.substring(0, 100)}{post.content.length > 100 ? '...' : ''}</td>
-                    <td>{post.user?.username || 'Unknown'}</td>
+                    <td>
+                      {/* Author Info - Display Full Name or Username */}
+                      <div className="post-author-info">
+                        {/* User thumbnail */}
+                        <div className="user-thumbnail">
+                          <img 
+                            src={post.user?.profile_picture_url || defaultProfilePic} 
+                            alt="User"
+                            className="profile-thumbnail" 
+                          />
+                        </div>
+                        <strong>
+                          {(post.user?.first_name && post.user?.last_name)
+                            ? `${post.user.first_name} ${post.user.last_name}`
+                            : (post.user?.username || 'Unknown')}
+                        </strong>
+                      </div>
+                      {/* Post Content */}
+                      <div className="post-content-text">
+                        {post.content.substring(0, 150)}{post.content.length > 150 ? '...' : ''}
+                      </div>
+                      {/* Likes and Comments below content */}
+                      <div className="post-interactions">
+                        <span className={`like-count ${post.user_liked ? 'liked' : ''}`}
+                        onClick={(e) => handleLikeToggle(e, post.id, post.user_liked)}>
+                          <i className="fas fa-thumbs-up"></i> {post.like_count || 0}
+                        </span>
+                        <span className="comment-count">
+                          <i className="fas fa-comment"></i> {post.comment_count || 0}
+                        </span>
+                      </div>
+                    </td>
                     <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                    <td className="post-likes">
-                      <span className="like-count">
-                        {/* Assuming you have Font Awesome or similar icons */}
-                        <i className="fas fa-thumbs-up"></i> {post.likes_count || 0}
-                      </span>
-                    </td>
-                    <td className="post-comments">
-                       <span className="comment-count">
-                         <i className="fas fa-comment"></i> {post.comments_count || 0}
-                       </span>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -188,7 +243,7 @@ function HomePage() {
       {selectedPost && (
         <PostModal
           isOpen={isModalOpen}
-          onClose={handleCloseModal}
+          onRequestClose={handleCloseModal} // Correct prop name for react-modal
           post={selectedPost}
           onPostUpdate={handlePostUpdate} // Pass update handler
           onPostDelete={loadPosts} // Reload posts if one is deleted

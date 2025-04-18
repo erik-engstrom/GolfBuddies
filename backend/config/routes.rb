@@ -25,6 +25,13 @@ Rails.application.routes.draw do
         end
         resources :comments, only: [:index, :create]
       end
+
+      # Add routes for comment likes
+      resources :comments, only: [] do
+        resource :like, only: [:create, :destroy], controller: 'comment_likes' do
+          get :status, on: :collection
+        end
+      end
     end
   end
 

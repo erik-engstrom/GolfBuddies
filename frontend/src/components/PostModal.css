@@ -136,3 +136,92 @@
 .comment-form button:hover {
   background-color: #0056b3;
 }
+
+/* User profile thumbnails */
+.post-author-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.author-thumbnail {
+  margin-right: 15px;
+}
+
+.author-info {
+  flex: 1;
+}
+
+.profile-thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #28a745; /* Golf green color border */
+}
+
+/* Comment thumbnails */
+.comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-thumbnail {
+  margin-right: 10px;
+}
+
+.comment-profile-thumbnail {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #28a745; /* Golf green color border */
+}
+
+.comment-item {
+  border-bottom: 1px solid #e9ecef;
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+/* Comment likes styling */
+.comment-user-info {
+  flex: 1;
+}
+
+.comment-actions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comment-like-button {
+  background-color: transparent;
+  border: 1px solid #28a745;
+  color: #28a745;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.comment-like-button:hover {
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.comment-like-button.liked {
+  background-color: #28a745;
+  color: white;
+}
+
+.comment-like-count {
+  font-size: 0.8rem;
+  color: #6c757d;
+}

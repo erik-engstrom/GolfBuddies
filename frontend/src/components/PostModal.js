@@ -2,10 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'; // Add useEffec
 import Modal from 'react-modal';
 import { fetchWithAuth } from '../utils/auth';
 import './PostModal.css';
-
-// Make sure to bind modal to your appElement (usually #root)
-// You can do this once in your main App.js or index.js
-// Modal.setAppElement('#root');
+import defaultProfilePic from '../images/default_pic.png';
 
 function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
   const [comments, setComments] = useState([]);
@@ -22,6 +19,10 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
   const [isCommenting, setIsCommenting] = useState(false);
   const [commentError, setCommentError] = useState(null);
 
+  // States for comment likes
+  const [commentLikingStates, setCommentLikingStates] = useState({});  // Tracks if a like action is in progress for a comment
+  const [commentLikeErrors, setCommentLikeErrors] = useState({});      // Tracks like errors for comments
+
   // --- Fetch Comments ---
   const fetchComments = useCallback(async () => {
     if (!post) return;
@@ -29,7 +30,28 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     setCommentsError(null);
     try {
       const fetchedComments = await fetchWithAuth(`http://localhost:3005/api/v1/posts/${post.id}/comments`);
-      setComments(fetchedComments || []);
+
+      // For each comment, fetch its like status
+      const commentsWithLikeInfo = await Promise.all((fetchedComments || []).map(async (comment) => {
+        try {
+          const likeStatus = await fetchWithAuth(`http://localhost:3005/api/v1/comments/${comment.id}/like/status`);
+          return { 
+            ...comment, 
+            like_count: likeStatus.like_count || 0,
+            user_liked: likeStatus.user_liked || false
+          };
+        } catch (err) {
+          console.error(`Failed to fetch like status for comment ${comment.id}:`, err);
+          // Return comment without like info if status fetch fails
+          return { 
+            ...comment, 
+            like_count: 0,
+            user_liked: false
+          };
+        }
+      }));
+      
+      setComments(commentsWithLikeInfo);
     } catch (err) {
       console.error('Failed to fetch comments:', err);
       setCommentsError(err.message || 'Could not load comments.');
@@ -109,6 +131,78 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     } finally {
       setIsLiking(false);
     }
+  };  // --- Handle Comment Like/Unlike ---
+  const handleCommentLikeToggle = async (commentId, currentUserLiked) => {
+    // Only allow unliking if the current user created the like
+    if (currentUserLiked) {
+      const comment = comments.find(c => c.id === commentId);
+      if (!comment || !comment.user_liked) {
+        setCommentLikeErrors(prev => ({ 
+          ...prev, 
+          [commentId]: 'You can only unlike comments that you have liked'
+        }));
+        return;
+      }
+    }
+    
+    // Set this specific comment's liking state to true
+    setCommentLikingStates(prev => ({ ...prev, [commentId]: true }));
+    // Clear error for this comment if any
+    setCommentLikeErrors(prev => ({ ...prev, [commentId]: null }));
+
+    const method = currentUserLiked ? 'DELETE' : 'POST';
+    const url = `http://localhost:3005/api/v1/comments/${commentId}/like`;
+
+    try {
+      // Optimistic UI update
+      const commentIndex = comments.findIndex(c => c.id === commentId);
+      if (commentIndex === -1) return; // Comment not found
+
+      const updatedComments = [...comments];
+      updatedComments[commentIndex] = {
+        ...updatedComments[commentIndex],
+        like_count: currentUserLiked 
+          ? Math.max(0, (updatedComments[commentIndex].like_count || 0) - 1)
+          : (updatedComments[commentIndex].like_count || 0) + 1,
+        user_liked: !currentUserLiked
+      };
+      setComments(updatedComments);
+
+      // Make the API call
+      const response = await fetchWithAuth(url, { method });
+      if (response.error) {
+        throw new Error(response.error);
+      }
+    } catch (err) {
+      console.error(`Failed to toggle like for comment ${commentId}:`, err);
+      
+      // Show a more specific error message for authorization issues
+      let errorMessage = 'Failed to update like status';
+      if (err.message && err.message.includes('authorize')) {
+        errorMessage = 'You can only unlike comments that you have liked';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setCommentLikeErrors(prev => ({ ...prev, [commentId]: errorMessage }));
+      
+      // Revert optimistic update on error
+      const commentIndex = comments.findIndex(c => c.id === commentId);
+      if (commentIndex !== -1) {
+        const updatedComments = [...comments];
+        updatedComments[commentIndex] = {
+          ...updatedComments[commentIndex],
+          like_count: currentUserLiked 
+            ? (updatedComments[commentIndex].like_count || 0)
+            : Math.max(0, (updatedComments[commentIndex].like_count || 1) - 1),
+          user_liked: currentUserLiked
+        };
+        setComments(updatedComments);
+      }
+    } finally {
+      // Reset the liking state for this comment
+      setCommentLikingStates(prev => ({ ...prev, [commentId]: false }));
+    }
   };
 
   // --- Handle Comment Submit ---
@@ -171,8 +265,19 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
         <button onClick={onRequestClose} className="close-button">&times;</button>
       </div>
       <div className="modal-body">
-        <p className="post-author">By: {post.user ? `${post.user.first_name} ${post.user.last_name}` : 'Unknown'}</p>
-        <p className="post-timestamp">{new Date(post.created_at).toLocaleString()}</p>
+        <div className="post-author-header">
+          <div className="author-thumbnail">
+            <img 
+              src={post.user?.profile_picture_url || defaultProfilePic} 
+              alt="User"
+              className="profile-thumbnail" 
+            />
+          </div>
+          <div className="author-info">
+            <p className="post-author">By: {post.user ? `${post.user.first_name} ${post.user.last_name}` : 'Unknown'}</p>
+            <p className="post-timestamp">{new Date(post.created_at).toLocaleString()}</p>
+          </div>
+        </div>
         <p className="post-content-full">{post.content}</p>
         <hr />
         {/* --- Like Section --- */}
@@ -199,11 +304,37 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
             ) : (
               comments.map(comment => (
                 <div key={comment.id} className="comment-item">
-                  <p className="comment-author">
-                    <strong>{comment.user ? `${comment.user.first_name} ${comment.user.last_name}` : 'Unknown'}:</strong>
-                  </p>
+                  <div className="comment-header">
+                    <div className="comment-thumbnail">
+                      <img 
+                        src={comment.user?.profile_picture_url || defaultProfilePic} 
+                        alt="User"
+                        className="comment-profile-thumbnail" 
+                      />
+                    </div>
+                    <div className="comment-user-info">
+                      <p className="comment-author">
+                        <strong>{comment.user ? `${comment.user.first_name} ${comment.user.last_name}` : 'Unknown'}</strong>
+                      </p>
+                      <p className="comment-timestamp">{new Date(comment.created_at).toLocaleString()}</p>
+                    </div>
+                  </div>
                   <p className="comment-content">{comment.content}</p>
-                  <p className="comment-timestamp">{new Date(comment.created_at).toLocaleString()}</p>
+                  <div className="comment-actions">
+                    <button
+                      onClick={() => handleCommentLikeToggle(comment.id, comment.user_liked)}
+                      className={`comment-like-button ${comment.user_liked ? 'liked' : ''}`}
+                      disabled={commentLikingStates[comment.id]}
+                    >
+                      {commentLikingStates[comment.id] ? '...' : (comment.user_liked ? 'Unlike' : 'Like')}
+                    </button>
+                    <span className="comment-like-count">
+                      {comment.like_count || 0} {comment.like_count === 1 ? 'Like' : 'Likes'}
+                    </span>
+                    {commentLikeErrors[comment.id] &&
+                      <p className="error-message small">Error: {commentLikeErrors[comment.id]}</p>
+                    }
+                  </div>
                 </div>
               ))
             )}
