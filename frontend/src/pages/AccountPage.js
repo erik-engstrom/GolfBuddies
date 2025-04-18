@@ -139,8 +139,8 @@ function AccountPage() {
                 </span>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="upload-button"
                 disabled={isUploading || !selectedFile}
               >

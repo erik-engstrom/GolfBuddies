@@ -5,9 +5,8 @@
 }
 
 .banner {
-  height: 250px; /* Adjust height as needed */
-  background-color: #a8d8b0; /* Placeholder light green */
-  /* background-image: url('YOUR_GOLF_COURSE_IMAGE_URL_HERE'); */ /* Replace with your image URL - MUST be a valid URL or path */
+  height: 350px; /* Increased height to better showcase the beautiful view */
+  background-color: #a8d8b0; /* Fallback color */
   background-size: cover;
   background-position: center;
   margin-bottom: 2rem;
@@ -23,6 +22,50 @@
   padding: 0 2rem 2rem; /* Add padding back for content below banner */
   max-width: 900px;
   margin: 0 auto;
+}
+
+/* Informative Section Styling */
+.info-section {
+  background-color: #ffffff; /* White background */
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Center align text */
+}
+
+.info-section h2 {
+  color: #28a745; /* Golf green color */
+  margin-bottom: 1rem;
+}
+
+.info-section p {
+  color: #495057; /* Slightly darker text for readability */
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.info-section ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0;
+  margin-bottom: 1.5rem;
+  text-align: left; /* Align list items left for readability */
+  display: inline-block; /* Center the block */
+}
+
+.info-section ul li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem; /* Space for custom bullet */
+  position: relative;
+  color: #495057;
+}
+
+.info-section ul li::before {
+  content: '\2713'; /* Checkmark symbol */
+  color: #28a745; /* Golf green color */
+  position: absolute;
+  left: 0;
+  font-weight: bold;
 }
 
 .create-post-form,

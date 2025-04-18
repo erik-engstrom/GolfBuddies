@@ -22,7 +22,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
   const [isCommenting, setIsCommenting] = useState(false);
   const [commentError, setCommentError] = useState(null);
 
-  // --- Fetch Comments --- 
+  // --- Fetch Comments ---
   const fetchComments = useCallback(async () => {
     if (!post) return;
     setIsLoadingComments(true);
@@ -38,7 +38,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     }
   }, [post]); // Dependency: post
 
-  // --- Fetch Like Status --- 
+  // --- Fetch Like Status ---
   const fetchLikeStatus = useCallback(async () => {
     if (!post) return;
     setIsLoadingLikeStatus(true);
@@ -55,7 +55,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     }
   }, [post]); // Dependency: post
 
-  // --- Fetch data when modal opens (post changes) --- 
+  // --- Fetch data when modal opens (post changes) ---
   useEffect(() => {
     if (isOpen && post) {
       fetchComments();
@@ -72,7 +72,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     }
   }, [isOpen, post, fetchComments, fetchLikeStatus]); // Dependencies
 
-  // --- Handle Like/Unlike --- 
+  // --- Handle Like/Unlike ---
   const handleLikeToggle = async () => {
     if (isLiking || !post) return;
     setIsLiking(true);
@@ -90,12 +90,12 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
 
       await fetchWithAuth(url, { method });
       // No need to refetch status, UI is already updated
-      
+
       // Update the post in parent component state
       if (onPostUpdate && post) {
-        const updatedPost = { 
-          ...post, 
-          like_count: originalLiked ? (post.like_count || 0) - 1 : (post.like_count || 0) + 1 
+        const updatedPost = {
+          ...post,
+          like_count: originalLiked ? (post.like_count || 0) - 1 : (post.like_count || 0) + 1
         };
         onPostUpdate(updatedPost);
       }
@@ -111,7 +111,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     }
   };
 
-  // --- Handle Comment Submit --- 
+  // --- Handle Comment Submit ---
   const handleCommentSubmit = async (event) => {
     event.preventDefault();
     if (isCommenting || !post) return;
@@ -135,7 +135,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
       // Add the new comment to the beginning of the list
       setComments(prevComments => [newComment, ...prevComments]);
       commentInput.value = ''; // Clear input
-      
+
       // Update the post in parent component state
       if (onPostUpdate && post) {
         const updatedPost = { 
@@ -152,7 +152,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     }
   };
 
-  // --- Render --- 
+  // --- Render ---
   if (!post) {
     return null;
   }
