@@ -14,11 +14,22 @@ export const removeToken = () => {
 // Example:
 export const fetchWithAuth = async (url, options = {}) => {
   const token = getToken();
-  const headers = {
-    ...options.headers,
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+  
+  // Initialize headers with the options.headers or an empty object
+  const headers = { ...options.headers };
+  
+  // Check if the request is a FormData request (for file uploads)
+  const isFormData = options.body instanceof FormData;
+  
+  // Only set default Content-Type if it's not a FormData request and not already set
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Set Accept header if not already set
+  if (!headers['Accept']) {
+    headers['Accept'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;

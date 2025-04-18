@@ -35,22 +35,22 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
       const commentsWithLikeInfo = await Promise.all((fetchedComments || []).map(async (comment) => {
         try {
           const likeStatus = await fetchWithAuth(`http://localhost:3005/api/v1/comments/${comment.id}/like/status`);
-          return { 
-            ...comment, 
+          return {
+            ...comment,
             like_count: likeStatus.like_count || 0,
             user_liked: likeStatus.user_liked || false
           };
         } catch (err) {
           console.error(`Failed to fetch like status for comment ${comment.id}:`, err);
           // Return comment without like info if status fetch fails
-          return { 
-            ...comment, 
+          return {
+            ...comment,
             like_count: 0,
             user_liked: false
           };
         }
       }));
-      
+
       setComments(commentsWithLikeInfo);
     } catch (err) {
       console.error('Failed to fetch comments:', err);
@@ -137,14 +137,14 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
     if (currentUserLiked) {
       const comment = comments.find(c => c.id === commentId);
       if (!comment || !comment.user_liked) {
-        setCommentLikeErrors(prev => ({ 
-          ...prev, 
+        setCommentLikeErrors(prev => ({
+          ...prev,
           [commentId]: 'You can only unlike comments that you have liked'
         }));
         return;
       }
     }
-    
+
     // Set this specific comment's liking state to true
     setCommentLikingStates(prev => ({ ...prev, [commentId]: true }));
     // Clear error for this comment if any
@@ -175,7 +175,7 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
       }
     } catch (err) {
       console.error(`Failed to toggle like for comment ${commentId}:`, err);
-      
+
       // Show a more specific error message for authorization issues
       let errorMessage = 'Failed to update like status';
       if (err.message && err.message.includes('authorize')) {
@@ -183,9 +183,9 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setCommentLikeErrors(prev => ({ ...prev, [commentId]: errorMessage }));
-      
+
       // Revert optimistic update on error
       const commentIndex = comments.findIndex(c => c.id === commentId);
       if (commentIndex !== -1) {
@@ -232,9 +232,9 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
 
       // Update the post in parent component state
       if (onPostUpdate && post) {
-        const updatedPost = { 
-          ...post, 
-          comment_count: (post.comment_count || 0) + 1 
+        const updatedPost = {
+          ...post,
+          comment_count: (post.comment_count || 0) + 1
         };
         onPostUpdate(updatedPost);
       }
@@ -267,10 +267,10 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
       <div className="modal-body">
         <div className="post-author-header">
           <div className="author-thumbnail">
-            <img 
-              src={post.user?.profile_picture_url || defaultProfilePic} 
+            <img
+              src={post.user?.profile_picture_url || defaultProfilePic}
               alt="User"
-              className="profile-thumbnail" 
+              className="profile-thumbnail"
             />
           </div>
           <div className="author-info">
@@ -306,10 +306,10 @@ function PostModal({ isOpen, onRequestClose, post, onPostUpdate }) {
                 <div key={comment.id} className="comment-item">
                   <div className="comment-header">
                     <div className="comment-thumbnail">
-                      <img 
-                        src={comment.user?.profile_picture_url || defaultProfilePic} 
+                      <img
+                        src={comment.user?.profile_picture_url || defaultProfilePic}
                         alt="User"
-                        className="comment-profile-thumbnail" 
+                        className="comment-profile-thumbnail"
                       />
                     </div>
                     <div className="comment-user-info">

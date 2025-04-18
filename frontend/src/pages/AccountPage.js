@@ -63,7 +63,7 @@ function AccountPage() {
       formData.append('profile_picture', selectedFile);
 
       // Send the request to upload the profile picture
-      await fetchWithAuth('/api/v1/users/profile_picture', {
+      await fetchWithAuth('http://localhost:3005/api/v1/users/profile_picture', {
         method: 'POST',
         body: formData,
         // Don't set Content-Type header when sending FormData

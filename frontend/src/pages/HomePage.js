@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../utils/auth';
-import PostModal from '../components/PostModal'; // Import the modal component
+import PostModal from '../components/PostModal';
 import './HomePage.css';
-// Import the banner image from the src/images directory
 import bannerImage from '../images/golf-banner.jpg';
 import defaultProfilePic from '../images/default_pic.png';
 
@@ -15,6 +14,15 @@ function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
+  // States for editing posts
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editPostContent, setEditPostContent] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  // State for delete confirmation
+  const [deletingPostId, setDeletingPostId] = useState(null);
+
   // Define the style for the banner using the imported image
   const bannerStyle = {
     backgroundImage: `url(${bannerImage})`
@@ -23,7 +31,18 @@ function HomePage() {
   // Fetch posts when component mounts
   useEffect(() => {
     loadPosts();
+    fetchCurrentUser();
   }, []); // Empty dependency array means this runs once on mount
+
+  // Function to fetch current user data
+  const fetchCurrentUser = async () => {
+    try {
+      const userData = await fetchWithAuth('http://localhost:3005/api/v1/users/me');
+      setCurrentUserId(userData.id);
+    } catch (err) {
+      console.error('Failed to fetch current user:', err);
+    }
+  };
 
   // Function to load posts - separated for reuse
   const loadPosts = async () => {
@@ -33,6 +52,17 @@ function HomePage() {
       const fetchedPosts = await fetchWithAuth('http://localhost:3005/api/v1/posts');
       // Sort posts by creation date, newest first
       const sortedPosts = (fetchedPosts || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      // Debug: Log posts to check profile picture URLs
+      console.log('Loaded posts with profile pictures:',
+        sortedPosts.map(post => ({
+          id: post.id,
+          user: post.user?.username || 'Unknown',
+          hasProfilePic: !!post.user?.profile_picture_url,
+          profilePicUrl: post.user?.profile_picture_url
+        }))
+      );
+
       setPosts(sortedPosts); // Handle null response and set sorted posts
     } catch (err) {
       console.error('Failed to fetch posts:', err);
@@ -128,9 +158,102 @@ function HomePage() {
       // Revert optimistic update on error
       const revertedPosts = [...posts]; // Create a new array from the original state before the optimistic update
       revertedPosts[postIndex] = originalPost; // Put the original post back
-      setPosts(revertedPosts); 
+      setPosts(revertedPosts);
       setError(err.message || 'Failed to update like status.');
     }
+  };
+
+  // --- Handle entering edit mode for a post ---
+  const handleEditPost = (event, post) => {
+    event.stopPropagation(); // Prevent opening the modal
+    setEditingPostId(post.id);
+    setEditPostContent(post.content);
+  };
+
+  // --- Handle canceling edit mode ---
+  const handleCancelEdit = (event) => {
+    event.stopPropagation(); // Prevent opening the modal
+    setEditingPostId(null);
+    setEditPostContent('');
+  };
+
+  // --- Handle updating a post ---
+  const handleUpdatePost = async (event, postId) => {
+    event.stopPropagation(); // Prevent opening the modal
+    if (!editPostContent.trim()) {
+      setError('Post content cannot be empty.');
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const updatedPost = await fetchWithAuth(`http://localhost:3005/api/v1/posts/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: editPostContent }),
+      });
+
+      // Update the post in the local state
+      const postIndex = posts.findIndex(p => p.id === postId);
+      if (postIndex !== -1) {
+        // Log to see what's in the updated post
+        console.log('Original post:', posts[postIndex]);
+        console.log('Updated post from server:', updatedPost);
+
+        const newPosts = [...posts];
+        // Merge the updated post with the existing one to keep all properties
+        newPosts[postIndex] = {
+          ...posts[postIndex],  // Keep all existing post properties
+          content: updatedPost.content,  // Update the content
+          updated_at: updatedPost.updated_at  // Update the timestamp
+        };
+        setPosts(newPosts);
+      }
+
+      // Exit edit mode
+      setEditingPostId(null);
+      setEditPostContent('');
+    } catch (err) {
+      console.error('Failed to update post:', err);
+      setError(err.message || 'Failed to update post.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // --- Handle deleting a post ---
+  const handleDeletePost = async (event, postId) => {
+    event.stopPropagation(); // Prevent opening the modal
+
+    // Toggle delete confirmation instead of using window.confirm
+    if (deletingPostId === postId) {
+      // User has already clicked delete once, and clicked delete again to confirm
+      try {
+        await fetchWithAuth(`http://localhost:3005/api/v1/posts/${postId}`, {
+          method: 'DELETE',
+        });
+
+        // Remove the post from the local state
+        setPosts(posts.filter(p => p.id !== postId));
+        setDeletingPostId(null); // Reset delete confirmation
+      } catch (err) {
+        console.error('Failed to delete post:', err);
+        setError(err.message || 'Failed to delete post.');
+        setDeletingPostId(null); // Reset delete confirmation on error
+      }
+    } else {
+      // First click - show confirmation
+      setDeletingPostId(postId);
+    }
+  };
+
+  // --- Handle canceling delete confirmation ---
+  const handleCancelDelete = (event) => {
+    event.stopPropagation(); // Prevent opening the modal
+    setDeletingPostId(null);
   };
 
 
@@ -188,8 +311,7 @@ function HomePage() {
             <table className="posts-table">
               <thead>
                 <tr>
-                  <th>Post</th> {/* Changed header from Content */}
-                  {/* <th>Author</th> Removed Author header */}
+                  <th>Post</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -201,10 +323,14 @@ function HomePage() {
                       <div className="post-author-info">
                         {/* User thumbnail */}
                         <div className="user-thumbnail">
-                          <img 
-                            src={post.user?.profile_picture_url || defaultProfilePic} 
+                          <img
+                            src={post.user?.profile_picture_url || defaultProfilePic}
                             alt="User"
-                            className="profile-thumbnail" 
+                            className="profile-thumbnail"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = defaultProfilePic;
+                            }}
                           />
                         </div>
                         <strong>
@@ -214,9 +340,36 @@ function HomePage() {
                         </strong>
                       </div>
                       {/* Post Content */}
-                      <div className="post-content-text">
-                        {post.content.substring(0, 150)}{post.content.length > 150 ? '...' : ''}
-                      </div>
+                      {editingPostId === post.id ? (
+                        <div className="post-edit-form" onClick={(e) => e.stopPropagation()}>
+                          <textarea
+                            value={editPostContent}
+                            onChange={(e) => setEditPostContent(e.target.value)}
+                            rows="4"
+                          />
+                          <div className="edit-buttons">
+                            <button
+                              type="button"
+                              className="save-button"
+                              onClick={(e) => handleUpdatePost(e, post.id)}
+                              disabled={isUpdating}
+                            >
+                              {isUpdating ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                              type="button"
+                              className="cancel-button"
+                              onClick={(e) => handleCancelEdit(e)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="post-content-text">
+                          {post.content.substring(0, 150)}{post.content.length > 150 ? '...' : ''}
+                        </div>
+                      )}
                       {/* Likes and Comments below content */}
                       <div className="post-interactions">
                         <span className={`like-count ${post.user_liked ? 'liked' : ''}`}
@@ -226,7 +379,48 @@ function HomePage() {
                         <span className="comment-count">
                           <i className="fas fa-comment"></i> {post.comment_count || 0}
                         </span>
+
+                        {/* Edit and Delete buttons - only show for post owner */}
+                        {post.user?.id === currentUserId && (
+                          <span className="post-owner-actions">
+                            <button 
+                              className="edit-button" 
+                              onClick={(e) => handleEditPost(e, post)}
+                              title="Edit post"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="delete-button" 
+                              onClick={(e) => handleDeletePost(e, post.id)}
+                              title="Delete post"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </span>
+                        )}
                       </div>
+
+                      {/* Delete confirmation message */}
+                      {deletingPostId === post.id && (
+                        <div className="delete-confirmation" onClick={(e) => e.stopPropagation()}>
+                          <p>Are you sure you want to delete this post?</p>
+                          <div className="confirmation-buttons">
+                            <button 
+                              className="confirm-delete-button" 
+                              onClick={(e) => handleDeletePost(e, post.id)}
+                            >
+                              Yes, Delete
+                            </button>
+                            <button 
+                              className="cancel-delete-button" 
+                              onClick={(e) => handleCancelDelete(e)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </td>
                     <td>{new Date(post.created_at).toLocaleDateString()}</td>
                   </tr>

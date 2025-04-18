@@ -19,7 +19,7 @@ Rails.application.routes.draw do
 
       post '/login', to: 'sessions#create'
 
-      resources :posts, only: [:index, :create] do
+      resources :posts, only: [:index, :create, :update, :destroy] do
         resource :like, only: [:create, :destroy] do
           get :status, on: :collection
         end
