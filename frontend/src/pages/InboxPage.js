@@ -13,7 +13,6 @@ function InboxPage() {
   const [messageInput, setMessageInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  // const navigate = useNavigate(); // Commented out since it's not being used
   const messagesEndRef = useRef(null);
 
   // Fetch messages for a specific conversation
@@ -97,8 +96,20 @@ function InboxPage() {
 
   // Handle selecting a conversation
   const handleSelectConversation = (buddy) => {
+    // Set a flag in state to indicate this is a new conversation selection
     setSelectedConversation(buddy);
-    fetchMessages(buddy.id);
+    setMessagesLoading(true); // Show loading state
+
+    // Fetch messages for this conversation
+    fetchMessages(buddy.id).then(() => {
+      // After messages are loaded, force an immediate scroll to bottom
+      if (messagesEndRef.current) {
+        // Use setTimeout to ensure DOM is updated before scrolling
+        setTimeout(() => {
+          messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+        }, 100);
+      }
+    });
   };
 
   // Handle sending a new message
@@ -134,9 +145,12 @@ function InboxPage() {
     }
   };
 
-  // Scroll to bottom whenever messages change
+  // Remove the auto scroll on conversation selection since we're handling it directly in handleSelectConversation
+  
+  // Auto scroll for all message changes
   useEffect(() => {
-    if (messagesEndRef.current) {
+    // Scroll to bottom whenever messages change
+    if (messagesEndRef.current && messages.length > 0) {
       messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }, [messages]);
