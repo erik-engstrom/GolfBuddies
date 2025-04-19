@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
 import PostModal from '../components/PostModal';
 import './HomePage.css';
 import bannerImage from '../images/golf-banner.jpg';
@@ -12,6 +13,7 @@ function HomePage() {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const navigate = useNavigate();
 
   // States for editing posts
   const [editingPostId, setEditingPostId] = useState(null);
@@ -256,6 +258,14 @@ function HomePage() {
     setDeletingPostId(null);
   };
 
+  // --- Handle navigation to user profile ---
+  const handleNavigateToUserProfile = (event, userId) => {
+    event.stopPropagation(); // Prevent opening the post modal
+    if (userId) {
+      navigate(`/users/${userId}`);
+    }
+  };
+
 
   return (
     <div className="home-page">
@@ -321,8 +331,12 @@ function HomePage() {
                     <td>
                       {/* Author Info - Display Full Name or Username */}
                       <div className="post-author-info">
-                        {/* User thumbnail */}
-                        <div className="user-thumbnail">
+                        {/* User thumbnail - make clickable */}
+                        <div 
+                          className="user-thumbnail"
+                          onClick={(e) => handleNavigateToUserProfile(e, post.user?.id)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           {/* Using improved profile picture handling */}
                           <img
                             src={post.user && post.user.profile_picture_url 
@@ -338,7 +352,10 @@ function HomePage() {
                             }}
                           />
                         </div>
-                        <strong>
+                        <strong 
+                          onClick={(e) => handleNavigateToUserProfile(e, post.user?.id)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           {(post.user?.first_name && post.user?.last_name)
                             ? `${post.user.first_name} ${post.user.last_name}`
                             : (post.user?.username || 'Unknown')}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/LoginPage.css';
 
 // Accept onLoginSuccess as a prop
 function LoginPage({ onLoginSuccess }) {
@@ -78,82 +79,118 @@ function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div>
-      <h1>{isSignUp ? 'Sign Up' : 'Login'}</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="login-container">
+      <div className="golf-ball"></div>
+      <div className="login-content">
+        <div className="login-branding">
+          <h1>GolfBuddies</h1>
+          <p>Connect with golf enthusiasts, find playing partners, and share your golf journey with friends.</p>
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <div className="login-form-container">
+          <div className="login-header">
+            <h2>{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
+            <p>{isSignUp ? 'Join the GolfBuddies community' : 'Sign in to your account'}</p>
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                className="form-control"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email address"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your password"
+                required
+              />
+            </div>
+
+            {/* Show additional fields only for Sign Up */}
+            {isSignUp && (
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="firstName">First Name</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    className="form-control"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Your first name"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="lastName">Last Name</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    className="form-control"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Your last name"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="handicap">Golf Handicap</label>
+                  <input
+                    type="number"
+                    id="handicap"
+                    className="form-control"
+                    value={handicap}
+                    onChange={(e) => setHandicap(e.target.value)}
+                    placeholder="Your handicap"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="golfStyle">Golf Style</label>
+                  <input
+                    type="text"
+                    id="golfStyle"
+                    className="form-control"
+                    value={golfStyle}
+                    onChange={(e) => setGolfStyle(e.target.value)}
+                    placeholder="Casual, Competitive, etc."
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" className="submit-button">
+              {isSignUp ? 'Create Account' : 'Sign In'}
+            </button>
+          </form>
+
+          <button
+            className="toggle-form"
+            onClick={() => setIsSignUp(!isSignUp)}
+          >
+            {isSignUp ? 'Already have an account? Sign In' : 'New to GolfBuddies? Create Account'}
+          </button>
         </div>
-
-        {/* Show additional fields only for Sign Up */}
-        {isSignUp && (
-          <>
-            <div>
-              <label htmlFor="firstName">First Name:</label>
-              <input
-                type="text"
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="lastName">Last Name:</label>
-              <input
-                type="text"
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="handicap">Golf Handicap:</label>
-              <input
-                type="number"
-                id="handicap"
-                value={handicap}
-                onChange={(e) => setHandicap(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="golfStyle">Golf Style Interest:</label>
-              <input
-                type="text"
-                id="golfStyle"
-                value={golfStyle}
-                onChange={(e) => setGolfStyle(e.target.value)}
-                required
-              />
-            </div>
-          </>
-        )}
-
-        <button type="submit">{isSignUp ? 'Sign Up' : 'Login'}</button>
-      </form>
-      <button onClick={() => setIsSignUp(!isSignUp)}>
-        {isSignUp ? 'Already have an account? Login' : 'Need an account? Sign Up'}
-      </button>
+      </div>
     </div>
   );
 }

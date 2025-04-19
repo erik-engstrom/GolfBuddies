@@ -3,7 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-import AccountPage from './pages/AccountPage'; // Import AccountPage
+import AccountPage from './pages/AccountPage';
+import UserProfilePage from './pages/UserProfilePage';
+import InboxPage from './pages/InboxPage'; // Import InboxPage
 import Header from './components/Header';
 import { getToken } from './utils/auth';
 
@@ -51,6 +53,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <AccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId" // Add route for viewing other user profiles
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inbox" // Add route for the inbox (direct messaging)
+            element={
+              <ProtectedRoute>
+                <InboxPage />
               </ProtectedRoute>
             }
           />

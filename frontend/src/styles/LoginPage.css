@@ -1,0 +1,173 @@
+/* Login and Sign Up Page Styling */
+.login-container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-branding {
+  flex: 1;
+  padding: 40px;
+  color: white;
+  display: none; /* Hidden on mobile by default */
+}
+
+.login-branding h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.login-branding p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.login-form-container {
+  flex: 1;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  margin: 20px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.login-header p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  border-color: #56ab2f;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(86, 171, 47, 0.2);
+}
+
+.error-message {
+  color: #e74c3c;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px 0;
+  background: #56ab2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+}
+
+.submit-button:hover {
+  background: #489426;
+}
+
+.toggle-form {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  padding: 5px;
+}
+
+.toggle-form:hover {
+  color: #56ab2f;
+}
+
+/* Form grid for sign up fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+/* Responsive design */
+@media (min-width: 768px) {
+  .login-branding {
+    display: block;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Golf-themed animation */
+.golf-ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  animation: bounce 1.5s infinite alternate;
+  left: 10%;
+  top: 30%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(20px);
+  }
+}

@@ -1,0 +1,189 @@
+/* User Profile Page Styles */
+.user-profile-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-container {
+  margin-right: 30px;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4CAF50;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-info h1 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.username {
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.handicap, .golf-style {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.add-buddy-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.add-buddy-button:hover {
+  background-color: #45a049;
+}
+
+.add-buddy-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.buddy-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.buddy-status.pending {
+  background-color: #FFC107;
+  color: #333;
+}
+
+.buddy-status.buddies {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.buddy-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 15px;
+}
+
+.message-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #2196F3;
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.message-button:hover {
+  background-color: #0b7dda;
+  text-decoration: none;
+  color: white;
+}
+
+.message-button i {
+  margin-right: 6px;
+}
+
+.respond-link {
+  display: inline-block;
+  background-color: #2196F3;
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.respond-link:hover {
+  background-color: #0b7dda;
+}
+
+.user-posts {
+  margin-top: 30px;
+}
+
+.user-posts h2 {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.posts-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.post-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-content {
+  margin-bottom: 10px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.post-date {
+  font-size: 12px;
+  color: #777;
+  text-align: right;
+}
+
+.no-posts {
+  color: #666;
+  font-style: italic;
+}
+
+.loading, .error-message {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  border-radius: 4px;
+}

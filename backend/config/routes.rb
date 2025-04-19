@@ -10,12 +10,31 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      # Keep user creation public
-      resources :users, only: [:create]
+      # Special user routes should come BEFORE the general users resource
       # Add a separate route for fetching the current user's data
       get '/users/me', to: 'users#me' 
       # Add route for profile picture upload
       post '/users/profile_picture', to: 'users#profile_picture'
+
+      # Keep user creation public
+      resources :users, only: [:create, :show] do
+        # Nested route for creating buddy requests to a specific user
+        resources :buddy_requests, only: [:create]
+        # Get buddy status with a user
+        get :buddy_status, on: :member
+        # Get posts by a specific user
+        get :posts, on: :member
+      end
+
+      # Buddy request routes
+      resources :buddy_requests, only: [:index, :destroy] do
+        member do
+          patch :accept
+          patch :decline
+        end
+      end
+      # Get all buddies
+      get '/buddies', to: 'buddy_requests#buddies'
 
       post '/login', to: 'sessions#create'
 
@@ -27,6 +46,14 @@ Rails.application.routes.draw do
       end
 
       # Add routes for comment likes
+      # Message routes
+      resources :messages, only: [:index, :show, :create] do
+        # Add a custom route to get conversations
+        collection do
+          get :conversations
+        end
+      end
+      
       resources :comments, only: [] do
         resource :like, only: [:create, :destroy], controller: 'comment_likes' do
           get :status, on: :collection

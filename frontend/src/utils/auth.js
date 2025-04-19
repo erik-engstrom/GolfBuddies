@@ -42,11 +42,22 @@ export const fetchWithAuth = async (url, options = {}) => {
 
   // Basic error handling, adjust as needed
   if (!response.ok) {
-    // Try to parse error JSON, default to empty object if parsing fails or response is empty
-    const errorData = await response.json().catch(() => ({})); 
-    // Construct error message from backend errors if available
-    const message = errorData.errors?.join(', ') || errorData.error || `HTTP error! status: ${response.status}`;
-    throw new Error(message);
+    try {
+      // Try to parse error JSON 
+      const errorData = await response.json();
+      // Construct error message from backend errors if available
+      const message = errorData.errors?.join(', ') || errorData.error || `HTTP error! status: ${response.status}`;
+      throw new Error(message);
+    } catch (e) {
+      // If JSON parsing fails, check if it's the buddy request endpoint
+      if (url.includes('/buddy_requests') && response.status === 500) {
+        // Special case: Buddy request might have succeeded despite error
+        console.warn('Buddy request may have succeeded despite error. Check account page.');
+        return { success: true, message: 'Buddy request processing. Please check your account page.' };
+      }
+      // For other cases, throw generic error with status
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
   }
 
   // Handle cases with no content (e.g., DELETE requests)

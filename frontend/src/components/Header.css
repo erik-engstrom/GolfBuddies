@@ -26,11 +26,26 @@
   cursor: pointer;
   padding: 0.5rem;
   transition: color 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
 }
 
 .header-nav a:hover,
 .header-nav button:hover {
   color: #61dafb; /* Highlight on hover */
+}
+
+.inbox-link {
+  position: relative;
+}
+
+.inbox-link i {
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
+.nav-text {
+  display: inline-block;
 }
 
 .logout-button {

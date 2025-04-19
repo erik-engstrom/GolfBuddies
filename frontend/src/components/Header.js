@@ -21,8 +21,11 @@ function Header({ isAuthenticated, onLogout }) {
         {isAuthenticated ? (
           <>
             <Link to="/home">Home</Link>
-            <Link to="/account">My Account</Link> {/* Add My Account link */}
-            {/* Add other authenticated links here */}
+            <Link to="/inbox" className="inbox-link">
+              <i className="fas fa-envelope"></i>
+              <span className="nav-text">Messages</span>
+            </Link>
+            <Link to="/account">My Account</Link>
             <button onClick={handleLogoutClick} className="logout-button">Logout</button>
           </>
         ) : (
