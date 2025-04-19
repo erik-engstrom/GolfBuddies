@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchWithAuth } from '../utils/auth';
 import { useLocation } from 'react-router-dom';
 import '../styles/InboxPage.css';
@@ -14,6 +14,7 @@ function InboxPage() {
   const [messages, setMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   // const navigate = useNavigate(); // Commented out since it's not being used
+  const messagesEndRef = useRef(null);
 
   // Fetch messages for a specific conversation
   const fetchMessages = useCallback(async (buddyId) => {
@@ -24,7 +25,20 @@ function InboxPage() {
       const messagesData = await fetchWithAuth(`/api/v1/messages?user_id=${buddyId}`);
 
       if (messagesData) {
-        setMessages(messagesData);
+        // Get current user ID from backend
+        const userResponse = await fetchWithAuth('/api/v1/users/me');
+        const currentUserId = userResponse?.id;
+
+        // Mark messages as sent by me or received
+        const processedMessages = messagesData.map(message => {
+          // If the current user is the sender, mark with sender_id 'me' for UI purposes
+          if (message.sender_id === currentUserId) {
+            return { ...message, sender_id: 'me' };
+          }
+          return message;
+        });
+
+        setMessages(processedMessages);
       } else {
         setMessages([]);
       }
@@ -94,38 +108,60 @@ function InboxPage() {
     if (!messageInput.trim() || !selectedConversation) return;
 
     try {
-      // Add the new message to the UI immediately (optimistic update)
-      const newMessage = {
-        id: Date.now(), // temporary ID
-        sender_id: 'me',
-        content: messageInput,
-        timestamp: new Date().toISOString()
+      // Send the message to the server first
+      const response = await fetchWithAuth(`/api/v1/messages`, {
+        method: 'POST',
+        body: JSON.stringify({
+          message: {
+            recipient_id: selectedConversation.id,
+            content: messageInput
+          }
+        }),
+      });
+
+      // Add the saved message to the UI
+      const savedMessage = {
+        ...response,
+        sender_id: 'me', // Keep the 'me' identifier for UI purposes
+        timestamp: response.created_at // Use the server's timestamp
       };
 
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      setMessages(prevMessages => [...prevMessages, savedMessage]);
       setMessageInput(''); // Clear input
-
-      // In a real implementation, you would send the message to the server
-      // const response = await fetchWithAuth(`/api/v1/messages`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     recipient_id: selectedConversation.id,
-      //     content: messageInput
-      //   }),
-      // });
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message. Please try again.');
     }
   };
 
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+    }
+  }, [messages]);
+
   // Format timestamp to readable format
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
+    if (!timestamp) return '';
+
+    const messageDate = new Date(timestamp);
+    const today = new Date();
+
+    // Format time as h:MM AM/PM format
+    const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+    const timeString = messageDate.toLocaleTimeString([], timeOptions);
+
+    // Format date (always include date now)
+    const dateOptions = { month: 'short', day: 'numeric' };
+
+    // If from a different year, include the year
+    if (messageDate.getFullYear() !== today.getFullYear()) {
+      dateOptions.year = 'numeric';
+    }
+
+    // Always show date and time
+    return `${messageDate.toLocaleDateString([], dateOptions)} ${timeString}`;
   };
 
   return (
@@ -147,13 +183,13 @@ function InboxPage() {
           ) : (
             <ul>
               {conversations.map(buddy => (
-                <li 
-                  key={buddy.id} 
+                <li
+                  key={buddy.id}
                   className={`conversation-item ${selectedConversation && selectedConversation.id === buddy.id ? 'selected' : ''}`}
                   onClick={() => handleSelectConversation(buddy)}
                 >
                   <div className="conversation-avatar">
-                    <img 
+                    <img
                       src={buddy.profile_picture_url || "/default_pic.png"} 
                       alt={`${buddy.first_name}'s profile`}
                       onError={(e) => {
@@ -177,7 +213,7 @@ function InboxPage() {
             <>
               <div className="messages-header">
                 <h2>
-                  <img 
+                  <img
                     src={selectedConversation.profile_picture_url || "/default_pic.png"} 
                     alt={`${selectedConversation.first_name}'s profile`}
                     className="selected-avatar"
@@ -200,14 +236,15 @@ function InboxPage() {
                 ) : (
                   <ul>
                     {messages.map(message => (
-                      <li 
-                        key={message.id} 
+                      <li
+                        key={message.id}
                         className={`message-item ${message.sender_id === 'me' ? 'sent' : 'received'}`}
                       >
                         <div className="message-content">{message.content}</div>
-                        <div className="message-timestamp">{formatTimestamp(message.timestamp)}</div>
+                        <div className="message-timestamp">{formatTimestamp(message.created_at || message.timestamp)}</div>
                       </li>
                     ))}
+                    <div ref={messagesEndRef}></div>
                   </ul>
                 )}
               </div>

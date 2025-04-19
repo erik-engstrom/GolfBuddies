@@ -1,8 +1,12 @@
 class User < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :likes, dependent: :destroy
-  has_many :posts, dependent: :destroy # Add has_many posts association
-
+  has_many :posts, dependent: :destroy
+  
+  # Message associations
+  has_many :sent_messages, class_name: 'Message', foreign_key: 'sender_id', dependent: :destroy
+  has_many :received_messages, class_name: 'Message', foreign_key: 'recipient_id', dependent: :destroy
+  
   # Buddy request associations
   has_many :sent_buddy_requests, class_name: 'BuddyRequest', foreign_key: 'sender_id', dependent: :destroy
   has_many :received_buddy_requests, class_name: 'BuddyRequest', foreign_key: 'receiver_id', dependent: :destroy

@@ -14,14 +14,14 @@ module Api
         # Use an array condition instead of a string condition for better SQL injection protection
         @messages = Message.where(
           ["(sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
-          current_user.id, other_user_id, other_user_id, current_user.id]
+          @current_user.id, other_user_id, other_user_id, @current_user.id]
         ).order(created_at: :asc)
 
         render json: @messages
       end
 
       def create
-        @message = current_user.sent_messages.new(message_params)
+        @message = @current_user.sent_messages.new(message_params)
 
         if @message.save
           render json: @message, status: :created
@@ -32,8 +32,8 @@ module Api
 
       def conversations
         # Get list of users that current_user has exchanged messages with
-        sent_to_ids = current_user.sent_messages.pluck(:recipient_id).uniq
-        received_from_ids = current_user.received_messages.pluck(:sender_id).uniq
+        sent_to_ids = @current_user.sent_messages.pluck(:recipient_id).uniq
+        received_from_ids = @current_user.received_messages.pluck(:sender_id).uniq
 
         # Combine and remove duplicates
         conversation_user_ids = (sent_to_ids + received_from_ids).uniq
@@ -47,7 +47,7 @@ module Api
           # Find the latest message between these users
           latest_message = Message.where(
             "(sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
-            current_user.id, user_id, user_id, current_user.id
+            @current_user.id, user_id, user_id, @current_user.id
           ).order(created_at: :desc).first
 
           @conversations << {
